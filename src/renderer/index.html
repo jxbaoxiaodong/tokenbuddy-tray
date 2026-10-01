@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;" />
+  <title>TokenBuddy</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- 托盘弹窗 -->
+  <section id="popup" class="popup hidden">
+    <div class="card">
+      <header class="pop-head">
+        <div class="brand"><span class="logo"></span><span>TokenBuddy</span></div>
+        <button id="p-gear" class="icon-btn" title="设置">设置</button>
+      </header>
+      <select id="p-site" class="site-select"></select>
+      <div class="balance">
+        <div class="amount" id="p-balance">$—</div>
+        <div class="sub" id="p-sub"></div>
+      </div>
+      <div class="actions">
+        <button id="p-refresh" class="btn primary">刷新</button>
+        <button id="p-settings" class="btn">配置站点</button>
+      </div>
+      <div class="foot">
+        <span id="p-status" class="status"></span>
+        <a id="p-quit" href="#">退出</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 设置窗口 -->
+  <section id="settings" class="settings hidden">
+    <div class="settings-head">
+      <div>
+        <h1>TokenBuddy 设置</h1>
+        <p class="muted">支持 <b>Sub2API</b>(本站框架)与 <b>New API</b>。凭据仅保存在本机。</p>
+      </div>
+      <div class="head-right">
+        <label class="muted">刷新间隔(秒)
+          <input id="s-interval" type="number" min="15" step="15" />
+        </label>
+      </div>
+    </div>
+    <div id="s-sites" class="sites"></div>
+    <div class="settings-actions">
+      <button id="s-add" class="btn">+ 添加站点</button>
+      <div class="spacer"></div>
+      <span id="s-status" class="status"></span>
+      <button id="s-save" class="btn primary">保存并刷新</button>
+    </div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
