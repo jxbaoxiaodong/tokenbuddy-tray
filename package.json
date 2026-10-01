@@ -4,14 +4,17 @@
   "version": "0.1.0",
   "description": "Cross-platform tray app that shows your AI API gateway balance (Sub2API / New API).",
   "license": "MIT",
-  "author": "TokenBuddy",
+  "author": {
+    "name": "TokenBuddy",
+    "email": "support@tokenbuddy.cc"
+  },
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
-    "dist": "electron-builder",
-    "dist:linux": "electron-builder --linux",
-    "dist:win": "electron-builder --win"
+    "dist": "electron-builder --publish never",
+    "dist:linux": "electron-builder --linux --publish never",
+    "dist:win": "electron-builder --win --publish never"
   },
   "devDependencies": {
     "electron": "^32.2.0",
