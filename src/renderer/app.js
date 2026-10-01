@@ -9,6 +9,7 @@ function money(v) {
   if (v !== 0 && Math.abs(v) < 1) return '$' + v.toFixed(4);
   return '$' + v.toFixed(2);
 }
+function esc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
 function ago(ts) {
   if (!ts) return '';
   const s = Math.floor((Date.now() - ts) / 1000);
@@ -16,6 +17,7 @@ function ago(ts) {
   if (s < 3600) return Math.floor(s / 60) + ' 分钟前';
   return Math.floor(s / 3600) + ' 小时前';
 }
+const FW = { sub2api: 'Sub2API', newapi: 'New API' };
 
 /* ============================ 托盘弹窗 ============================ */
 let snap = { results: {}, sites: [], activeSiteId: null, refreshing: false };
@@ -33,13 +35,11 @@ function renderPopup() {
 
   const active = snap.sites.find((s) => s.id === snap.activeSiteId) || snap.sites[0];
   const r = active ? snap.results[active.id] : null;
-  const balEl = $('p-balance');
-  const subEl = $('p-sub');
-  const stEl = $('p-status');
+  const balEl = $('p-balance'), subEl = $('p-sub'), stEl = $('p-status');
 
   if (!active) {
     balEl.textContent = '$—'; balEl.className = 'amount';
-    subEl.textContent = '还没有配置任何站点';
+    subEl.textContent = '还没有配置站点,点「配置站点」开始';
     stEl.textContent = '';
   } else if (r && r.error) {
     balEl.textContent = '读取失败'; balEl.className = 'amount err';
@@ -48,9 +48,10 @@ function renderPopup() {
   } else if (r) {
     balEl.textContent = money(r.balance); balEl.className = 'amount';
     const bits = [];
+    if (r.framework) bits.push(FW[r.framework] || r.framework);
     if (typeof r.todayCost === 'number') bits.push('今日 ' + money(r.todayCost));
-    if (typeof r.used === 'number') bits.push('已用 ' + money(r.used));
-    if (typeof r.totalCost === 'number') bits.push('累计 ' + money(r.totalCost));
+    else if (typeof r.used === 'number') bits.push('已用 ' + money(r.used));
+    if (typeof r.totalCost === 'number' && r.totalCost !== r.used) bits.push('累计 ' + money(r.totalCost));
     subEl.textContent = bits.join(' · ') || (r.name || '');
     stEl.textContent = snap.refreshing ? '刷新中…' : ago(r.at);
   } else {
@@ -78,15 +79,7 @@ function siteCard(site) {
   const el = document.createElement('div');
   el.className = 'site';
   el.dataset.id = site.id || '';
-  const type = site.type || 'sub2api';
-  const cred = type === 'newapi'
-    ? `<div class="field"><label>用户名</label><input data-k="username" value="${esc(site.username)}"/></div>
-       <div class="field"><label>密码</label><input data-k="password" type="password" value="${esc(site.password)}"/></div>
-       <div class="field"><label>访问令牌(可选,优先)</label><input data-k="accessToken" value="${esc(site.accessToken)}"/></div>
-       <div class="field"><label>用户 ID(可选)</label><input data-k="userId" value="${esc(site.userId)}"/></div>
-       <div class="field full hint">New API 余额 = quota ÷ 500000。密码模式会自动登录取 session;填了访问令牌则优先用令牌。</div>`
-    : `<div class="field"><label>邮箱</label><input data-k="email" value="${esc(site.email)}"/></div>
-       <div class="field"><label>密码</label><input data-k="password" type="password" value="${esc(site.password)}"/></div>`;
+  const type = site.type || '';
   el.innerHTML = `
     <div class="site-head">
       <span class="title">${esc(site.name || '新站点')}</span>
@@ -94,24 +87,27 @@ function siteCard(site) {
     </div>
     <div class="grid">
       <div class="field"><label>名称</label><input data-k="name" value="${esc(site.name)}"/></div>
-      <div class="field"><label>框架</label>
-        <select data-k="type">
-          <option value="sub2api"${type === 'sub2api' ? ' selected' : ''}>Sub2API(本站)</option>
-          <option value="newapi"${type === 'newapi' ? ' selected' : ''}>New API</option>
-        </select>
-      </div>
       <div class="field full"><label>站点地址</label><input data-k="baseUrl" placeholder="https://example.com" value="${esc(site.baseUrl)}"/></div>
-      ${cred}
+      <div class="field full"><label>API Key(推荐)</label><input data-k="apiKey" placeholder="sk-..." value="${esc(site.apiKey)}"/></div>
+      <div class="field full hint">粘贴 API Key 即可,程序自动识别 Sub2API / New API 并读取余额。</div>
+      <details class="full adv"><summary>高级:改用账号密码登录</summary>
+        <div class="grid" style="margin-top:10px">
+          <div class="field"><label>框架(可选)</label>
+            <select data-k="type">
+              <option value=""${type === '' ? ' selected' : ''}>自动识别</option>
+              <option value="sub2api"${type === 'sub2api' ? ' selected' : ''}>Sub2API</option>
+              <option value="newapi"${type === 'newapi' ? ' selected' : ''}>New API</option>
+            </select>
+          </div>
+          <div class="field"><label>邮箱 / 用户名</label><input data-k="username" value="${esc(site.username || site.email)}"/></div>
+          <div class="field"><label>密码</label><input data-k="password" type="password" value="${esc(site.password)}"/></div>
+          <div class="field"><label>用户 ID(New API 可选)</label><input data-k="userId" value="${esc(site.userId)}"/></div>
+        </div>
+      </details>
     </div>`;
   el.querySelector('.del').onclick = () => el.remove();
-  el.querySelector('[data-k="type"]').onchange = (e) => {
-    const cur = {};
-    el.querySelectorAll('[data-k]').forEach((inp) => { cur[inp.dataset.k] = inp.value; });
-    el.replaceWith(siteCard(Object.assign({}, cur, { type: e.target.value, id: el.dataset.id })));
-  };
   return el;
 }
-function esc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
 
 function renderSettings() {
   $('settings').classList.remove('hidden');
@@ -119,7 +115,7 @@ function renderSettings() {
   const wrap = $('s-sites');
   wrap.innerHTML = '';
   (cfg.sites || []).forEach((s) => wrap.appendChild(siteCard(s)));
-  $('s-add').onclick = () => wrap.appendChild(siteCard({ type: 'sub2api', name: '新站点' }));
+  $('s-add').onclick = () => wrap.appendChild(siteCard({ name: '新站点' }));
   $('s-save').onclick = saveSettings;
 }
 
@@ -128,7 +124,8 @@ async function saveSettings() {
   document.querySelectorAll('.site').forEach((el) => {
     const o = { id: el.dataset.id || undefined };
     el.querySelectorAll('[data-k]').forEach((inp) => { o[inp.dataset.k] = inp.value.trim(); });
-    if (o.baseUrl) sites.push(o);
+    if (o.username && !o.email) o.email = o.username;   // 兼容 Sub2API 用邮箱登录
+    if (o.baseUrl && (o.apiKey || o.password)) sites.push(o);
   });
   cfg.sites = sites;
   cfg.refreshSeconds = Number($('s-interval').value) || 120;

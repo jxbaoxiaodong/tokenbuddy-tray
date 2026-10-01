@@ -8,7 +8,7 @@ const { fetchBalance } = require('./lib/adapters');
 const { renderTextIcon, shortBalance, colorForBalance } = require('./lib/icon');
 
 const DEFAULT_CONFIG = { refreshSeconds: 120, activeSiteId: null, sites: [] };
-const SECRET_FIELDS = ['password', 'accessToken'];
+const SECRET_FIELDS = ['password', 'accessToken', 'apiKey'];
 const DEBUG = process.argv.includes('--dev') || !!process.env.TB_DEBUG;
 
 let tray = null;
@@ -202,7 +202,7 @@ ipcMain.handle('tb:saveConfig', (_e, cfg) => {
     const out = {
       id, name: s.name || '站点', type: s.type || 'sub2api', baseUrl: s.baseUrl || '',
       email: s.email || '', username: s.username || '', userId: s.userId || '', quotaPerUnit: s.quotaPerUnit || undefined,
-      password: encSecret(s.password), accessToken: encSecret(s.accessToken),
+      password: encSecret(s.password), accessToken: encSecret(s.accessToken), apiKey: encSecret(s.apiKey),
     };
     return out;
   });

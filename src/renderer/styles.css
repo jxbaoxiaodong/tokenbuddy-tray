@@ -91,3 +91,6 @@ button, select, input { font: inherit; }
 .settings-actions .btn { flex: 0 0 auto; padding: 9px 18px; }
 .spacer { flex: 1; }
 .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+details.adv { margin-top: 4px; }
+details.adv > summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+details.adv > summary:hover { color: var(--text); }
