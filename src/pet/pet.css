@@ -1,0 +1,51 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; background: transparent; overflow: hidden; }
+body { user-select: none; -webkit-user-select: none; cursor: default; font: 12px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+#stage { position: fixed; inset: 0; }
+
+/* 余额气泡 */
+.bubble {
+  position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
+  max-width: calc(100% - 12px);
+  padding: 5px 10px; border-radius: 12px;
+  background: rgba(15, 23, 42, .92); color: #e6edf7;
+  font-weight: 600; font-size: 12px; white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .35);
+  border: 1px solid rgba(148, 163, 184, .25);
+}
+.bubble::after {
+  content: ''; position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%);
+  border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid rgba(15, 23, 42, .92);
+}
+.bubble.low { background: rgba(127, 29, 29, .94); border-color: rgba(248, 113, 113, .5); }
+.bubble.low::after { border-top-color: rgba(127, 29, 29, .94); }
+
+/* 宠物本体 */
+.pet {
+  position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.media { display: block; width: 100%; height: 100%; object-fit: contain; -webkit-user-drag: none; pointer-events: none; }
+.hidden { display: none !important; }
+.fallback { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); }
+
+/* 待机动画 */
+.idle  { animation: petIdle 3.4s ease-in-out infinite; }
+.idle2 { animation: petIdle2 4.2s ease-in-out infinite; }
+@keyframes petIdle {
+  0%, 100% { transform: translateY(0) rotate(-1deg) scale(1); }
+  50%      { transform: translateY(-7px) rotate(1deg) scale(1.02); }
+}
+@keyframes petIdle2 {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  45%      { transform: translateY(-4px) scaleY(1.03); }
+  70%      { transform: translateY(0) scaleY(.98); }
+}
+.hop { animation: petHop .45s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes petHop {
+  0% { transform: translateY(0) scale(1); }
+  35% { transform: translateY(-22px) scale(1.06, .9); }
+  70% { transform: translateY(0) scale(.96, 1.05); }
+  100% { transform: translateY(0) scale(1); }
+}

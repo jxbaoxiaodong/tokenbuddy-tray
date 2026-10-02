@@ -14,7 +14,8 @@
     "dev": "electron . --dev",
     "dist": "electron-builder --publish never",
     "dist:linux": "electron-builder --linux --publish never",
-    "dist:win": "electron-builder --win --publish never"
+    "dist:win": "electron-builder --win --publish never",
+    "dist:mac": "electron-builder --mac --publish never"
   },
   "devDependencies": {
     "electron": "^32.2.0",
@@ -35,6 +36,11 @@
     },
     "win": {
       "target": ["nsis", "portable"],
+      "icon": "assets/icon.png"
+    },
+    "mac": {
+      "target": ["dmg", "zip"],
+      "category": "public.app-category.utilities",
       "icon": "assets/icon.png"
     },
     "nsis": {

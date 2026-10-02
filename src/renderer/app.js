@@ -138,9 +138,51 @@ async function saveSettings() {
   setTimeout(() => { $('s-status').textContent = ''; }, 1500);
 }
 
+/* ---------------------------- 桌面宠物设置 ---------------------------- */
+let petState = null;
+
+function petName(p) {
+  if (p.asset && p.asset.name) return p.asset.name;
+  if (p.assetPath) return p.assetPath.split(/[\\/]/).pop();
+  return '使用内置吉祥物';
+}
+function refreshPetUI() {
+  const p = petState || {};
+  $('pet-enabled').checked = !!p.enabled;
+  $('pet-asset-name').textContent = petName(p);
+  $('pet-size').value = p.size || 200;
+  $('pet-size-val').textContent = (p.size || 200) + ' px';
+  $('pet-opacity').value = p.opacity == null ? 1 : p.opacity;
+  $('pet-opacity-val').textContent = Math.round((p.opacity == null ? 1 : p.opacity) * 100) + '%';
+  $('pet-show-balance').checked = p.showBalance !== false;
+  $('pet-ontop').checked = !!p.alwaysOnTop;
+  $('pet-flip').checked = !!p.flip;
+  $('pet-autostart').checked = !!p.autostart;
+}
+async function petSet(patch) { petState = await window.tb.pet.set(patch); refreshPetUI(); }
+
+async function initPet() {
+  petState = await window.tb.pet.get();
+  refreshPetUI();
+  $('pet-enabled').onchange = (e) => petSet({ enabled: e.target.checked });
+  $('pet-choose').onclick = async () => { const r = await window.tb.pet.choose(); if (r) { petState = r; refreshPetUI(); } };
+  $('pet-reset').onclick = () => petSet({ assetPath: '', mediaType: 'image', enabled: true });
+  $('pet-size').oninput = (e) => { $('pet-size-val').textContent = e.target.value + ' px'; };
+  $('pet-size').onchange = (e) => petSet({ size: Number(e.target.value) });
+  $('pet-opacity').oninput = (e) => { $('pet-opacity-val').textContent = Math.round(Number(e.target.value) * 100) + '%'; };
+  $('pet-opacity').onchange = (e) => petSet({ opacity: Number(e.target.value) });
+  $('pet-show-balance').onchange = (e) => petSet({ showBalance: e.target.checked });
+  $('pet-ontop').onchange = (e) => petSet({ alwaysOnTop: e.target.checked });
+  $('pet-flip').onchange = (e) => petSet({ flip: e.target.checked });
+  $('pet-autostart').onchange = async (e) => { await window.tb.pet.autostart(e.target.checked); };
+}
+
 async function initSettings() {
   cfg = await window.tb.getConfig();
   renderSettings();
+  await initPet();
+  window.tb.onGoto((sec) => { if (sec === 'pet') $('s-pet').scrollIntoView({ block: 'start' }); });
+  if (params.get('section') === 'pet') $('s-pet').scrollIntoView({ block: 'start' });
 }
 
 if (VIEW === 'settings') initSettings();

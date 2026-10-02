@@ -22,6 +22,21 @@
 - 多站点:可同时配置多个中转站,随时切换。
 - 定时自动刷新(默认 120 秒,可调)。
 - 凭据只存本机;可用时用系统安全存储(Electron `safeStorage`)加密。
+- **桌面宠物**:可换成任意图片(包括宝宝照片)、GIF 动图或 WebM 视频;自动待机动画;透明处鼠标穿透;头顶实时余额气泡。
+
+## 桌面宠物
+
+一个透明、无边框、始终置顶的小家伙待在桌面上,头顶悬浮实时余额。
+
+- **形象完全自定义**:设置里「选择图片」,支持 `PNG / JPG / GIF / WebP / APNG / SVG / WebM / MP4`。
+  - 静态图(如宝宝照片)自动加待机动画(轻微起伏/呼吸),点一下会蹦跳;
+  - GIF / WebM 直接播放原生动画。
+  - 不选时使用内置吉祥物。
+- **操作**:拖动移动;左键点一下蹦一下并弹出余额面板;右键出菜单。
+- **透明穿透**:形象透明区域鼠标事件穿透到桌面,只有形象本体和气泡可点(逐像素命中检测)。
+- **右键菜单**:更换形象、大小(100–420px)、显示余额气泡、始终置顶、左右翻转、开机自启、打开余额面板、隐藏、退出。
+- **余额气泡**:实时显示当前站点余额;余额偏低(≤$1)变红提醒。
+- **开机自启**:Windows/macOS 用系统登录项,Linux 写 `~/.config/autostart/`。
 
 ## 快速开始
 
@@ -81,19 +96,21 @@ npm start -- --no-sandbox   # 受限环境
 ```bash
 npm run dist:linux   # AppImage + deb
 npm run dist:win     # NSIS 安装包 + 免安装 exe(在 Windows 或 CI 上执行)
+npm run dist:mac     # dmg + zip(必须在 macOS 上执行)
 ```
 
-推 tag 会触发 GitHub Actions 自动为 Windows / Linux 出包并上传为 Release 附件。
+推 tag 会触发 GitHub Actions 自动为 **Windows / Linux / macOS** 出包并生成 Release 附件。
 
 ## 目录结构
 
 ```
 src/
-  main.js            主进程:托盘、窗口、轮询、配置
+  main.js            主进程:托盘、余额面板、桌面宠物窗口、轮询、配置
   preload.js         安全桥(contextBridge)
   lib/adapters.js    Sub2API / New API 余额适配(Key 优先,自动识别)
   lib/icon.js        纯 stdlib 的 PNG 编码 + 位图字体(把余额画进托盘图标)
-  renderer/          弹窗与设置界面(原生 HTML/CSS/JS)
+  renderer/          余额面板与设置界面(原生 HTML/CSS/JS)
+  pet/               桌面宠物窗口(透明/穿透/拖动/右键/余额气泡)
 scripts/gen_icons.js 生成应用图标
 ```
 

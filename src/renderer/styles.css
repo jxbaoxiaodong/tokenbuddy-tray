@@ -94,3 +94,12 @@ button, select, input { font: inherit; }
 details.adv { margin-top: 4px; }
 details.adv > summary { cursor: pointer; color: var(--muted); font-size: 12px; }
 details.adv > summary:hover { color: var(--text); }
+
+.pet-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin: 16px 0 4px; }
+.pet-asset-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.pet-asset-row .btn { flex: 0 0 auto; padding: 7px 12px; }
+.pet-asset-row .muted { flex: 1; min-width: 160px; }
+.pet-checks { display: flex; gap: 16px; flex-wrap: wrap; }
+.chk { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text); }
+.switch { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
