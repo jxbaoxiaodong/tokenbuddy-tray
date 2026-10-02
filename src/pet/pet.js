@@ -14,6 +14,10 @@ const bubble = $('bubble');
 const bubbleText = $('bubbleText');
 const petEl = $('pet');
 
+img.addEventListener('load', () => computeAlpha());
+fallback.addEventListener('load', () => computeAlpha());
+video.addEventListener('loadeddata', () => computeAlpha());
+
 // 内置默认吉祥物(SVG data URL,可被 drawImage,不会污染 canvas)
 const DEFAULT_MASCOT = 'data:image/svg+xml;utf8,' + encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">' +
@@ -85,8 +89,7 @@ function layout() {
   const s = Math.max(64, Number(state.size) || 200);
   petEl.style.width = s + 'px';
   petEl.style.height = s + 'px';
-  fallback.style.width = s + 'px';
-  fallback.style.height = s + 'px';
+  petEl.classList.toggle('flip', !!state.flip);
   document.documentElement.style.opacity = String(state.opacity == null ? 1 : state.opacity);
 }
 function applyMedia() {
@@ -104,14 +107,13 @@ function applyMedia() {
       img.classList.remove('hidden');
       currentMedia = img;
     }
-    [petEl].forEach((el) => { el.classList.remove('hop'); el.classList.add('idle'); });
   } else {
     fallback.src = DEFAULT_MASCOT;
     fallback.classList.remove('hidden');
     currentMedia = fallback;
-    petEl.classList.add('idle');
   }
-  petEl.style.transform = 'translateX(-50%)' + (state.flip ? ' scaleX(-1)' : '');
+  petEl.classList.remove('hop');
+  petEl.classList.add('idle');
   setTimeout(computeAlpha, 120);
 }
 function applyState(s) {
@@ -173,7 +175,10 @@ document.addEventListener('dragstart', (e) => e.preventDefault());
 /* ---------------- 启动 ---------------- */
 (async function init() {
   const st = await window.tb.pet.get();
-  applyState(st);
+  applyState({
+    size: st.size, opacity: st.opacity, flip: st.flip, showBalance: st.showBalance,
+    mediaType: st.mediaType, asset: st.asset ? st.asset.url : null,
+  });
   if (st.snapshot) updateSnapshot(st.snapshot);
   window.tb.onUpdate((snap) => updateSnapshot(snap));
   window.tb.pet.onReload((payload) => {
