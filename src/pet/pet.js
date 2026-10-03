@@ -11,6 +11,7 @@ const img = $('media');
 const video = $('mediaVideo');
 const fallback = $('fallback');
 const bubble = $('bubble');
+const bubbleName = $('bubbleName');
 const bubbleText = $('bubbleText');
 const petEl = $('pet');
 
@@ -20,14 +21,44 @@ video.addEventListener('loadeddata', () => computeAlpha());
 
 // 内置默认吉祥物(SVG data URL,可被 drawImage,不会污染 canvas)
 const DEFAULT_MASCOT = 'data:image/svg+xml;utf8,' + encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">' +
-  '<ellipse cx="60" cy="70" rx="41" ry="37" fill="#8b9bf5"/>' +
-  '<ellipse cx="60" cy="96" rx="34" ry="12" fill="#000000" opacity="0.12"/>' +
-  '<circle cx="46" cy="64" r="7.5" fill="#0b1220"/><circle cx="74" cy="64" r="7.5" fill="#0b1220"/>' +
-  '<circle cx="48.5" cy="61.5" r="2.6" fill="#fff"/><circle cx="76.5" cy="61.5" r="2.6" fill="#fff"/>' +
-  '<path d="M50 82 Q60 91 70 82" stroke="#0b1220" stroke-width="3.2" fill="none" stroke-linecap="round"/>' +
-  '<circle cx="38" cy="80" r="5.4" fill="#f9a8d4" opacity="0.85"/><circle cx="82" cy="80" r="5.4" fill="#f9a8d4" opacity="0.85"/>' +
-  '<circle cx="60" cy="34" r="6" fill="#a5b4fc"/><path d="M60 28 q0 -10 -8 -12" stroke="#a5b4fc" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140">' +
+  '<defs>' +
+  '<radialGradient id="body" cx="38%" cy="30%" r="78%">' +
+  '<stop offset="0%" stop-color="#c4b5fd"/><stop offset="52%" stop-color="#818cf8"/><stop offset="100%" stop-color="#4f46e5"/>' +
+  '</radialGradient>' +
+  '<radialGradient id="gloss" cx="50%" cy="50%" r="50%">' +
+  '<stop offset="0%" stop-color="#ffffff" stop-opacity=".55"/><stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>' +
+  '</radialGradient>' +
+  '<linearGradient id="tip" x1="0" y1="0" x2="0" y2="1">' +
+  '<stop offset="0%" stop-color="#fde68a"/><stop offset="100%" stop-color="#fbbf24"/>' +
+  '</linearGradient>' +
+  '</defs>' +
+  // 地面投影
+  '<ellipse cx="70" cy="124" rx="40" ry="9" fill="#0b1220" opacity="0.13"/>' +
+  // 天线
+  '<path d="M70 26 q0 -13 11 -16" stroke="#a5b4fc" stroke-width="4.5" fill="none" stroke-linecap="round"/>' +
+  '<circle cx="83" cy="11" r="7.5" fill="url(#tip)"/>' +
+  '<circle cx="81" cy="9" r="2.4" fill="#fff" opacity="0.9"/>' +
+  // 耳朵
+  '<path d="M33 45 L26 25 L48 34 Z" fill="#6366f1"/>' +
+  '<path d="M107 45 L114 25 L92 34 Z" fill="#6366f1"/>' +
+  // 身体
+  '<circle cx="70" cy="74" r="46" fill="url(#body)"/>' +
+  '<circle cx="70" cy="74" r="46" fill="none" stroke="#3730a3" stroke-width="2.5" opacity="0.55"/>' +
+  // 高光
+  '<ellipse cx="56" cy="52" rx="22" ry="16" fill="url(#gloss)" transform="rotate(-22 56 52)"/>' +
+  // 腮红
+  '<ellipse cx="40" cy="86" rx="10" ry="6.5" fill="#fda4af" opacity="0.5"/>' +
+  '<ellipse cx="100" cy="86" rx="10" ry="6.5" fill="#fda4af" opacity="0.5"/>' +
+  // 眼睛
+  '<ellipse cx="55" cy="72" rx="9" ry="10.5" fill="#0b1220"/>' +
+  '<ellipse cx="85" cy="72" rx="9" ry="10.5" fill="#0b1220"/>' +
+  '<circle cx="58.5" cy="68" r="3.4" fill="#fff"/>' +
+  '<circle cx="88.5" cy="68" r="3.4" fill="#fff"/>' +
+  '<circle cx="52.5" cy="76" r="1.8" fill="#fff" opacity="0.75"/>' +
+  '<circle cx="82.5" cy="76" r="1.8" fill="#fff" opacity="0.75"/>' +
+  // 嘴
+  '<path d="M62 92 Q70 99.5 78 92" stroke="#0b1220" stroke-width="3.4" fill="none" stroke-linecap="round"/>' +
   '</svg>'
 );
 
@@ -125,19 +156,30 @@ function applyState(s) {
 }
 
 /* ---------------- 余额气泡 ---------------- */
-function money(v) {
-  if (typeof v !== 'number' || !isFinite(v)) return '$—';
-  if (v !== 0 && Math.abs(v) < 1) return '$' + v.toFixed(4);
-  return '$' + v.toFixed(2);
+function money(v, unit) {
+  const sym = unit === 'CNY' ? '¥' : (unit === 'TOKENS' ? '' : '$');
+  if (typeof v !== 'number' || !isFinite(v)) return sym + '—';
+  if (v !== 0 && Math.abs(v) < 1) return sym + v.toFixed(4);
+  return sym + v.toFixed(2);
 }
 function updateSnapshot(snap) {
   const r = snap && snap.active;
+  // 站名取配置里的名字;只看余额不知道是哪个站点
+  const site = snap && snap.sites ? snap.sites.find((s) => s.id === snap.activeSiteId) : null;
+  bubbleName.textContent = (site && site.name) || (r && r.name) || '';
+
   if (!r || r.error) {
-    bubbleText.textContent = snap && snap.refreshing ? '刷新中…' : (r && r.error ? '读取失败' : '$—');
+    bubbleText.textContent = snap && snap.refreshing ? '刷新中…' : (r && r.error ? '读取失败' : '—');
     bubble.classList.remove('low');
     return;
   }
-  bubbleText.textContent = money(r.balance);
+  if (r.unlimited) {
+    bubbleText.textContent = '无限额度';
+    bubble.classList.remove('low');
+    if (state.showBalance && bubble.classList.contains('hidden')) bubble.classList.remove('hidden');
+    return;
+  }
+  bubbleText.textContent = r.balance == null ? '—' : money(r.balance, r.unit);
   const low = typeof r.balance === 'number' && r.balance <= 1;
   bubble.classList.toggle('low', low);
   if (state.showBalance && bubble.classList.contains('hidden')) bubble.classList.remove('hidden');

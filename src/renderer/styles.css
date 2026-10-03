@@ -91,6 +91,33 @@ button, select, input { font: inherit; }
 .settings-actions .btn { flex: 0 0 auto; padding: 9px 18px; }
 .spacer { flex: 1; }
 .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* 架构识别徽章 */
+.site-head { gap: 10px; }
+.site-head .title { flex: 1; }
+.fw-badge {
+  flex: 0 0 auto; font-size: 11px; padding: 3px 9px; border-radius: 999px;
+  background: var(--card2); border: 1px solid var(--line); color: var(--muted); white-space: nowrap;
+}
+.fw-badge.newapi { background: rgba(251, 191, 36, .14); border-color: rgba(251, 191, 36, .45); color: #fbbf24; }
+.fw-badge.pending { color: var(--muted); font-style: italic; }
+.fw-badge.unknown { color: #f87171; border-color: rgba(248, 113, 113, .4); }
+
+/* 为什么这套架构要/不要登录 */
+.why {
+  background: var(--card2); border: 1px solid var(--line); border-left: 3px solid var(--line);
+  border-radius: 8px; padding: 9px 12px; font-size: 12px; line-height: 1.55; color: var(--text);
+}
+.why:empty { display: none; }
+.why b { font-weight: 600; }
+.why p { margin: 5px 0 0; }
+.why ul { margin: 5px 0 0; padding-left: 18px; }
+.why li { margin: 3px 0; }
+.why code {
+  background: rgba(148, 163, 184, .16); padding: 1px 5px; border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px;
+}
+[data-fw="newapi"] .why { border-left-color: #fbbf24; }
 details.adv { margin-top: 4px; }
 details.adv > summary { cursor: pointer; color: var(--muted); font-size: 12px; }
 details.adv > summary:hover { color: var(--text); }

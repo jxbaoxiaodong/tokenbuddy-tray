@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('tb', {
   getSnapshot: () => ipcRenderer.invoke('tb:getSnapshot'),
   saveConfig: (cfg) => ipcRenderer.invoke('tb:saveConfig', cfg),
   refresh: () => ipcRenderer.invoke('tb:refresh'),
+  detect: (url) => ipcRenderer.invoke('tb:detect', url),
   setActive: (id) => ipcRenderer.invoke('tb:setActive', id),
   openSettings: () => ipcRenderer.send('tb:openSettings'),
   hidePopup: () => ipcRenderer.send('tb:hidePopup'),

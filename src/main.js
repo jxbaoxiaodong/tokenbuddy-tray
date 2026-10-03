@@ -4,8 +4,8 @@ const { app, Tray, Menu, BrowserWindow, nativeImage, ipcMain, screen, safeStorag
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
-const { fetchBalance } = require('./lib/adapters');
-const { renderTextIcon, shortBalance, colorForBalance } = require('./lib/icon');
+const { fetchBalance, detectFramework } = require('./lib/adapters');
+const { renderBalanceIcon, shortBalance, colorForBalance, currencySymbol, money } = require('./lib/icon');
 
 const DEFAULT_CONFIG = {
   refreshSeconds: 120,
@@ -99,13 +99,17 @@ function refreshTray() {
   if (!tray) return;
   const site = activeSite();
   const r = site ? results[site.id] : null;
-  const balance = r && !r.error ? r.balance : null;
-  const text = balance == null ? '-' : shortBalance(balance);
-  const color = r && r.error ? '#94a3b8' : colorForBalance(balance);
-  tray.setImage(nativeImage.createFromBuffer(renderTextIcon(text, { size: 64, color }).png));
+  const failed = !!(r && r.error);
+  const balance = r && !failed ? r.balance : null;
+  const unit = r && r.unit ? r.unit : 'USD';
+  const color = failed ? '#94a3b8' : colorForBalance(balance);
+  // 图标上行是站点名(放不下自动缩写成 TB / XCO),下行是金额;金额读不到时显示 --
+  const amount = failed ? 'ERR' : (balance == null ? '--' : currencySymbol(unit) + shortBalance(balance));
   const label = site ? site.name : 'TokenBuddy';
-  const balText = r && r.error ? '读取失败' : (balance == null ? '—' : `$${Number(balance).toFixed(2)}`);
-  tray.setToolTip(`${label} · ${balText}`);
+  tray.setImage(nativeImage.createFromBuffer(renderBalanceIcon({ name: label, amount, color, size: 64 }).png));
+  const balText = failed ? '读取失败' : (balance == null ? '—' : money(balance, unit));
+  const hint = r && r.unlimitedHint ? '\n' + r.unlimitedHint : '';
+  tray.setToolTip(`${label} · ${balText}${hint}`);
   tray.setContextMenu(buildMenu());
 }
 
@@ -113,7 +117,10 @@ function buildMenu() {
   const items = [];
   for (const s of config.sites) {
     const r = results[s.id];
-    const suffix = r ? (r.error ? '  ⚠ ' : `  $${Number(r.balance || 0).toFixed(2)}`) : '  …';
+    // 余额读不到时别印 $0,那和"真的是 0"看起来没区别
+    const suffix = !r ? '  …' : r.error ? '  ⚠ '
+      : r.balance == null ? '  —'
+        : '  ' + money(r.balance, r.unit);
     items.push({
       label: s.name + suffix, type: 'radio',
       checked: activeSite() && activeSite().id === s.id,
@@ -361,6 +368,15 @@ ipcMain.handle('tb:saveConfig', (_e, cfg) => {
   return rendererConfig();
 });
 ipcMain.handle('tb:refresh', () => { refreshAll(); return true; });
+// 站点架构识别:只凭地址做未鉴权探测,供界面决定"要不要显示账号密码"
+ipcMain.handle('tb:detect', async (_e, baseUrl) => {
+  const u = String(baseUrl || '').trim();
+  if (!/^https?:\/\/[^\s]+$/i.test(u)) return null;
+  try {
+    const d = await detectFramework(u);
+    return { framework: d.framework, quotaPerUnit: d.quotaPerUnit, displayType: d.displayType, tried: d.tried };
+  } catch (e) { return null; }
+});
 ipcMain.handle('tb:setActive', (_e, id) => { config.activeSiteId = id; saveConfig(); refreshTray(); broadcast({}); return true; });
 ipcMain.on('tb:openSettings', () => openSettings());
 ipcMain.on('tb:hidePopup', () => { if (popup) popup.hide(); });
@@ -407,7 +423,7 @@ if (!gotLock) {
   app.on('second-instance', () => { if (popup) togglePopup(); });
   app.whenReady().then(() => {
     loadConfig();
-    tray = new Tray(nativeImage.createFromBuffer(renderTextIcon('…', { size: 64 }).png));
+    tray = new Tray(nativeImage.createFromBuffer(renderBalanceIcon({ name: 'TokenBuddy', amount: '-', size: 64 }).png));
     tray.on('click', togglePopup);
     tray.on('right-click', () => tray.popUpContextMenu(buildMenu()));
     createPopup();
