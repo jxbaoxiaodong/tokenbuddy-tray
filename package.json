@@ -25,6 +25,7 @@
   "build": {
     "appId": "cc.tokenbuddy.tray",
     "productName": "TokenBuddy",
+    "afterAllArtifactBuild": "scripts/patch-deb-postinst.js",
     "files": [
       "src/**/*",
       "assets/**/*",
