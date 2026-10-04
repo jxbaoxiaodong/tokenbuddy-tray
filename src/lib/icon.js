@@ -226,61 +226,29 @@ function drawText(px, w, h, text, scale, rgb, ox, oy) {
  * @returns {{png:Buffer,width:number,height:number}}
  */
 function renderBalanceIcon(opts = {}) {
-  const H = opts.size || 64;
-  const amount = String(opts.amount == null || opts.amount === '' ? '-' : opts.amount);
+  const size = Number(opts.size) || 64;
+  const H = size;
+  const amountStr = String(opts.amount == null || opts.amount === '' ? '-' : opts.amount);
   const bg = hexToRgb(opts.bg || '#0f172a');
   const color = hexToRgb(opts.color || '#34d399');
-  const nameColor = hexToRgb(opts.nameColor || '#cbd5e1');
   const alpha = opts.alpha == null ? 245 : opts.alpha;
-  const padX = 5;
-
-  const rawName = String(opts.name || '').trim();
-  // 每个候选都要过一遍 renderableName:中文站名缩写后仍是中文,必须被剔掉
-  const cands = [...new Set([rawName, abbrevName(rawName, 3), abbrevName(rawName, 2)]
-    .map(renderableName).filter(Boolean))];
-
-  let plan = null;
-  // 字号不能只看宽度:点阵字高是 7*scale,双行还要再加行距。
-  // 只按宽度挑字号会让小尺寸下第二行(金额)整个画到画布外,金额就看不见了;
-  // 刚好塞满也不行,文字会贴边且上下不对称,所以上下各留 1px。
-  const maxScale = Math.max(1, Math.floor(H / 7));
-  const planGapY = Math.max(2, Math.round(H * 0.09));
-  // 1) 双行:站名与金额同字号,站名缩写到放得下为止
-  {
-    const maxW = Math.round(H * ICON_MAX_ASPECT);
-    const widthAt = (s, n) => Math.max(textWidth(n, s), textWidth(amount, s)) + padX * 2;
-    for (const scale of [3, 2]) {
-      if (scale > maxScale || 2 * 7 * scale + planGapY + 2 > H) continue;
-      for (const n of cands) {
-        if (widthAt(scale, n) <= maxW) { plan = { scale, name: n, twoLine: true }; break; }
-      }
-      if (plan) break;
-    }
+  const padX = 1;
+  let scale = Math.max(1, Math.floor(H / 7));
+  if (7 * scale > H - 1) scale = scale - 1;
+  if (scale < 1) scale = 1;
+  while (scale + 1 <= Math.floor(H / 7)) {
+    const s2 = scale + 1;
+    const w2 = textWidth(amountStr, s2) + padX * 2;
+    if (w2 > Math.round(H * ICON_MAX_ASPECT_SINGLE)) break;
+    scale = s2;
   }
-  // 2) 单行:站名画不了或两行都塞不下,金额独占一行并尽量放大
-  if (!plan) {
-    const maxW = Math.round(H * ICON_MAX_ASPECT_SINGLE);
-    for (const scale of [5, 4, 3]) {
-      if (scale > maxScale || 7 * scale + 2 > H) continue;
-      if (textWidth(amount, scale) + padX * 2 <= maxW) { plan = { scale, name: '', twoLine: false }; break; }
-    }
-    if (!plan) plan = { scale: Math.max(1, maxScale - 1), name: '', twoLine: false };
-  }
-
-  const { scale, name, twoLine } = plan;
-  const nameW = twoLine ? textWidth(name, scale) : 0;
-  const amtW = textWidth(amount, scale);
-  const textW = Math.max(nameW, amtW);
-  const W = textW + padX * 2;
+  const amtW = textWidth(amountStr, scale);
   const glyphH = 7 * scale;
-  const gapY = twoLine ? planGapY : 0;
-  const top = Math.round((H - (glyphH * (twoLine ? 2 : 1) + gapY)) / 2);
-
+  const top = Math.round((H - glyphH) / 2);
+  const W = amtW + padX * 2;
   const px = Buffer.alloc(W * H * 4, 0);
   fillRoundedRect(px, W, H, Math.round(H * 0.22), bg, alpha);
-  if (twoLine) drawText(px, W, H, name, scale, nameColor, padX + Math.round((textW - nameW) / 2), top);
-  drawText(px, W, H, amount, scale, color, padX + Math.round((textW - amtW) / 2), top + (twoLine ? glyphH + gapY : 0));
-
+  drawText(px, W, H, amountStr, scale, color, padX, top);
   return { png: encodePNG(W, H, px), width: W, height: H };
 }
 

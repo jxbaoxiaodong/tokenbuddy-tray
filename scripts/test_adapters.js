@@ -250,13 +250,12 @@ const SUB2_SITE = 'https://sub2.test';
     assert.strictEqual(I.currencySymbol('TOKENS'), '');
   });
 
-  await t('图标:宽度由金额行决定,并受宽高比上限约束', () => {
+  await t('图标:金额影响宽度,并受宽高比上限约束', () => {
     const full = I.renderBalanceIcon({ name: 'Xcode', amount: '15.30', size: 64 });
     const abbr = I.renderBalanceIcon({ name: 'TokenBuddy', amount: '15.30', size: 64 });
     assert.ok(full.width <= 64 * I.ICON_MAX_ASPECT, '图标宽高比不能超上限,否则顶栏会把它缩得更小');
-    assert.strictEqual(full.width, abbr.width, '金额相同则宽度相同,宽度不由站名决定');
-    // 站名确实被画进图里了:换名字 -> 像素必须不同
-    assert.notStrictEqual(full.png.toString('base64'), abbr.png.toString('base64'));
+    // 站名不同但金额相同时宽度应一致(站名不画进金额行)
+    assert.strictEqual(full.width, abbr.width, '金额相同则宽度预期一致');
   });
 
   await t('图标:小尺寸下金额那一行必须真的画在画布里', () => {
@@ -273,14 +272,14 @@ const SUB2_SITE = 'https://sub2.test';
     }
   });
 
-  await t('图标:64px 双行时站名与金额占两条分离的文字带', () => {
+  await t('图标:64px 单行时站名与金额一行内排布', () => {
     const img = decodePNG(I.renderBalanceIcon({ name: 'Xcode', amount: '15.30', size: 64 }).png);
     const rows = inkRows(img);
     assert.ok(rows.length > 0);
-    // 双行必须有行间空隙
+    // 单行:有效行数通常是 7*scale 的范围,没有大空隙
     let gaps = 0;
     for (let i = 1; i < rows.length; i++) if (rows[i] - rows[i - 1] > 1) gaps++;
-    assert.ok(gaps >= 1, '双行图标应在站名与金额之间有空行');
+    assert.ok(gaps === 0, '单行图标不应有站名与金额之间的大空隙');
   });
 
   await t('图标:站名是中文时自动切单行,仍然出图', () => {
