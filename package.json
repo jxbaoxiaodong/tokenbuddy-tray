@@ -1,11 +1,12 @@
 {
   "name": "tokenbuddy-tray",
   "productName": "TokenBuddy",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Cross-platform tray app that shows your AI API gateway balance (Sub2API / New API family / 专用站点 / custom).",
   "license": "MIT",
   "author": {
-    "name": "TokenBuddy"
+    "name": "TokenBuddy",
+    "email": "noreply@example.com"
   },
   "main": "src/main.js",
   "scripts": {

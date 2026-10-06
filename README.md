@@ -60,7 +60,16 @@
 
 ## 快速开始
 
-1. 在项目的 **Releases** 页面下载与你的系统和 CPU 架构匹配的安装包。Windows 可选免安装版或安装版,Linux 可选 AppImage 或 deb,macOS 可选 Intel 或 Apple 芯片版本。
+1. 从 [`v0.4.1 Release`](../../releases/tag/v0.4.1) 下载与你的系统和 CPU 架构匹配的安装包:
+
+   | 系统 | 下载 | 说明 |
+   |---|---|---|
+   | **Windows** | [免安装版](../../releases/download/v0.4.1/TokenBuddy.0.4.1.exe) | 直接运行 |
+   | **Windows** | [安装版](../../releases/download/v0.4.1/TokenBuddy.Setup.0.4.1.exe) | 带安装向导 |
+   | **Linux** | [AppImage](../../releases/download/v0.4.1/TokenBuddy-0.4.1.AppImage) | 下载后赋予执行权限 |
+   | **Linux** | [deb](../../releases/download/v0.4.1/tokenbuddy-tray_0.4.1_amd64.deb) | Debian / Ubuntu |
+   | **macOS Intel** | [dmg](../../releases/download/v0.4.1/TokenBuddy-0.4.1.dmg) | Intel 芯片 |
+   | **macOS Apple 芯片** | [dmg](../../releases/download/v0.4.1/TokenBuddy-0.4.1-arm64.dmg) | Apple 芯片 |
 2. 启动程序。它会缩到系统托盘,托盘图标就是主要入口。
 3. 右键托盘图标 → **设置…** → **添加站点**。
 4. 填写站点名称、**API Key 的 BASE URL**和 **API Key**。BASE URL 应来自你创建 API Key 的服务后台,不是营销官网或登录页。
