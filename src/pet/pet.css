@@ -1,0 +1,61 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; background: transparent; overflow: hidden; }
+body { user-select: none; -webkit-user-select: none; cursor: default; font: 12px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+#stage { position: fixed; inset: 0; }
+
+/* 余额牌:站点名与金额同一行,让信息更紧凑,也避免遮住宠物形象 */
+.bubble {
+  position: absolute; top: 7px; left: 50%; transform: translateX(-50%);
+  max-width: calc(100% - 16px); min-width: 0;
+  padding: 4px 8px 5px; border-radius: 10px;
+  display: flex; flex-direction: row; align-items: baseline; gap: 5px;
+  background: rgba(15, 23, 42, .94);
+  color: #e6edf7;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, .34), 0 0 0 1px rgba(148, 163, 184, .16) inset;
+  border: 1px solid rgba(148, 163, 184, .28);
+  white-space: nowrap;
+}
+.bubble::before {
+  content: ''; width: 4px; height: 4px; flex: 0 0 auto; border-radius: 50%;
+  background: #34d399; box-shadow: 0 0 0 2px rgba(52, 211, 153, .12);
+}
+.bubble .bn {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 9px; font-weight: 600; letter-spacing: .015em; color: #a7b6cc;
+}
+.bubble .bubble-sep { flex: 0 0 auto; color: #60728e; font-size: 10px; }
+.bubble .bt { flex: 0 0 auto; font-weight: 750; font-size: 13px; line-height: 1; letter-spacing: -.02em; color: #f8fafc; }
+.bubble::after {
+  content: ''; position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%);
+  border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid rgba(15, 23, 42, .94);
+}
+.bubble.low { background: rgba(69, 10, 10, .94); border-color: rgba(248, 113, 113, .55); }
+.bubble.low::before { background: #f87171; box-shadow: 0 0 0 2px rgba(248, 113, 113, .14); }
+.bubble.low .bt { color: #fecaca; }
+.bubble.low::after { border-top-color: rgba(69, 10, 10, .94); }
+.bubble.no-site .bn, .bubble.no-site .bubble-sep { display: none; }
+
+/* 宠物本体:居中由外层负责,动画只作用在自己这一层,互不覆盖 */
+.pet {
+  position: absolute; left: 50%; bottom: 0;
+  transform: translateX(-50%);
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.media, .fallback { display: block; width: 100%; height: 100%; object-fit: contain; -webkit-user-drag: none; pointer-events: none; }
+.hidden { display: none !important; }
+.pet.flip .media, .pet.flip .fallback { transform: scaleX(-1); }
+
+/* 待机 / 蹦跳动画(作用在 .pet 自己;keyframe 里带上居中位移) */
+.idle  { animation: petIdle 3.4s ease-in-out infinite; }
+.hop   { animation: petHop .45s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes petIdle {
+  0%, 100% { transform: translateX(-50%) translateY(0) rotate(-1deg) scale(1); }
+  50%      { transform: translateX(-50%) translateY(-7px) rotate(1deg) scale(1.02); }
+}
+@keyframes petHop {
+  0%   { transform: translateX(-50%) translateY(0) scale(1); }
+  35%  { transform: translateX(-50%) translateY(-22px) scale(1.06, .9); }
+  70%  { transform: translateX(-50%) translateY(0) scale(.96, 1.05); }
+  100% { transform: translateX(-50%) translateY(0) scale(1); }
+}

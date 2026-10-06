@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;" />
+  <title>TokenBuddy</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- 托盘弹窗 -->
+  <section id="popup" class="popup hidden">
+    <div class="card">
+      <header class="pop-head">
+        <div class="brand"><span class="logo"></span><span>TokenBuddy</span></div>
+        <button id="p-gear" class="icon-btn" title="设置">设置</button>
+      </header>
+      <select id="p-site" class="site-select"></select>
+      <div class="balance">
+        <div class="amount" id="p-balance">$—</div>
+        <div class="sub" id="p-sub"></div>
+      </div>
+      <div class="actions">
+        <button id="p-refresh" class="btn primary">刷新</button>
+        <button id="p-settings" class="btn">配置站点</button>
+      </div>
+      <div class="foot">
+        <span id="p-status" class="status"></span>
+        <a id="p-quit" href="#">退出</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 设置窗口 -->
+  <section id="settings" class="settings hidden">
+    <div class="settings-head">
+      <div>
+        <h1>TokenBuddy 设置</h1>
+        <p class="muted">支持 <b>Sub2API</b>、<b>New API 系</b>与部分专用站点。认不出来的协议可在「高级」里用<b>能力探测</b>或<b>手填余额接口</b>接入。可自行添加多个兼容站点。凭据仅保存在本机。</p>
+      </div>
+      <div class="head-right">
+        <label class="muted">刷新间隔(秒)
+          <input id="s-interval" type="number" min="15" step="15" />
+        </label>
+      </div>
+    </div>
+    <div class="pet-card" id="s-pet">
+      <div class="site-head">
+        <span class="title">桌面宠物</span>
+        <label class="switch"><input id="pet-enabled" type="checkbox" /> <span>启用</span></label>
+      </div>
+      <div class="grid">
+        <div class="field full">
+          <label>宠物形象(支持 PNG/JPG/GIF/WebP/APNG/SVG/WebM/MP4,可放任意图片,如宝宝照片)</label>
+          <div class="pet-asset-row">
+            <span id="pet-asset-name" class="muted">使用内置吉祥物</span>
+            <button id="pet-choose" class="btn">选择图片…</button>
+            <button id="pet-reset" class="btn">恢复默认</button>
+          </div>
+        </div>
+        <div class="field"><label>大小 <span id="pet-size-val" class="muted"></span></label>
+          <input id="pet-size" type="range" min="100" max="420" step="10" /></div>
+        <div class="field"><label>透明度 <span id="pet-opacity-val" class="muted"></span></label>
+          <input id="pet-opacity" type="range" min="0.3" max="1" step="0.05" /></div>
+        <div class="field pet-checks full">
+          <label class="chk"><input id="pet-show-balance" type="checkbox" /> 显示余额气泡</label>
+          <label class="chk"><input id="pet-ontop" type="checkbox" /> 始终置顶</label>
+          <label class="chk"><input id="pet-flip" type="checkbox" /> 左右翻转</label>
+        </div>
+        <div class="field full hint">小技巧:宠物可拖动;左键点一下弹出余额面板;右键出菜单(换形象 / 大小 / 置顶 / 自启 / 退出)。透明区域鼠标可穿透。</div>
+      </div>
+    </div>
+
+    <div class="pet-card" id="s-bar">
+      <div class="site-head">
+        <span class="title">顶栏余额条</span>
+        <label class="switch"><input id="bar-enabled" type="checkbox" /> <span>启用</span></label>
+      </div>
+      <div class="grid">
+        <div class="field"><label>整体大小 <span id="bar-scale-val" class="muted"></span></label>
+          <input id="bar-scale" type="range" min="0.6" max="2.5" step="0.05" /></div>
+        <div class="field"><label>圆角(0=直角) <span id="bar-radius-val" class="muted"></span></label>
+          <input id="bar-radius" type="range" min="0" max="60" step="1" /></div>
+        <div class="field"><label>自定义缩写(留空=自动,如 TB / XCO / RC)</label>
+          <input id="bar-abbrev" placeholder="自动缩写" maxlength="6" /></div>
+        <div class="field"><label>数字颜色(留空=随余额状态变色)</label>
+          <input id="bar-fg-color" type="color" /></div>
+        <div class="field full"><label>背景色(留空=默认深色)</label>
+          <div class="pet-asset-row">
+            <input id="bar-bg-color" type="color" />
+            <button id="bar-bg-reset" class="btn">恢复默认深色</button>
+            <button id="bar-fg-reset" class="btn">数字恢复状态色</button>
+          </div>
+        </div>
+        <div class="field full hint">余额条可按住拖动;单击打开余额面板。大小、颜色、缩写、圆角即时生效(保存后)。</div>
+      </div>
+    </div>
+
+    <div id="s-sites" class="sites"></div>
+    <div class="settings-actions">
+      <button id="s-add" class="btn">+ 添加站点</button>
+      <div class="spacer"></div>
+      <span id="s-status" class="status"></span>
+      <button id="s-save" class="btn primary">保存并刷新</button>
+    </div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>

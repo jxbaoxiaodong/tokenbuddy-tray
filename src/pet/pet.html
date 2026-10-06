@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' data:;" />
+  <title>TokenBuddy Pet</title>
+  <link rel="stylesheet" href="pet.css" />
+</head>
+<body>
+  <div id="stage">
+    <div id="bubble" class="bubble hidden">
+      <span id="bubbleName" class="bn"></span>
+      <span class="bubble-sep" aria-hidden="true">·</span>
+      <span id="bubbleText" class="bt">—</span>
+    </div>
+    <div id="pet" class="pet">
+      <img id="media" class="media" alt="" draggable="false" />
+      <video id="mediaVideo" class="media hidden" autoplay loop muted playsinline></video>
+    </div>
+    <img id="fallback" class="fallback hidden" alt="" draggable="false" />
+  </div>
+  <script src="pet.js"></script>
+</body>
+</html>

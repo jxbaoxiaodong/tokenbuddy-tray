@@ -1,0 +1,134 @@
+:root {
+  --bg: #0b1220;
+  --card: #111a2e;
+  --card2: #16223b;
+  --line: #24334f;
+  --text: #e6edf7;
+  --muted: #8aa0c0;
+  --accent: #6366f1;
+  --green: #34d399;
+  --amber: #fbbf24;
+  --red: #f87171;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font: 13px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: var(--text);
+  background: transparent;
+}
+.hidden { display: none !important; }
+.muted { color: var(--muted); }
+button, select, input { font: inherit; }
+
+/* ---------- 托盘弹窗 ---------- */
+.popup { padding: 8px; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+}
+.pop-head { display: flex; align-items: center; justify-content: space-between; }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 600; letter-spacing: .3px; }
+.logo {
+  width: 14px; height: 14px; border-radius: 5px;
+  background: linear-gradient(135deg, #818cf8, #22d3ee);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, .15);
+}
+.icon-btn {
+  background: transparent; color: var(--muted); border: 1px solid var(--line);
+  border-radius: 8px; padding: 3px 8px; cursor: pointer;
+}
+.icon-btn:hover { color: var(--text); border-color: var(--accent); }
+.site-select {
+  width: 100%; margin-top: 12px; padding: 6px 8px; color: var(--text);
+  background: var(--card2); border: 1px solid var(--line); border-radius: 8px;
+}
+.balance { text-align: center; padding: 16px 0 8px; }
+.amount { font-size: 34px; font-weight: 700; letter-spacing: .5px; }
+.amount.err { color: var(--red); font-size: 16px; }
+.sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
+.actions { display: flex; gap: 8px; margin-top: 8px; }
+.btn {
+  flex: 1; padding: 8px 10px; border-radius: 9px; cursor: pointer;
+  background: var(--card2); color: var(--text); border: 1px solid var(--line);
+}
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: linear-gradient(135deg, #6366f1, #4f46e5); border-color: transparent; }
+.btn.primary:hover { filter: brightness(1.08); }
+.foot { display: flex; justify-content: space-between; margin-top: 10px; font-size: 12px; }
+.foot a { color: var(--muted); text-decoration: none; }
+.foot a:hover { color: var(--red); }
+.status { color: var(--muted); }
+.status.ok { color: #4ade80; }
+.status.err { color: #f87171; }
+
+/* ---------- 设置窗口 ---------- */
+.settings { padding: 18px 20px; background: var(--bg); min-height: 100vh; }
+.settings-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.settings-head h1 { margin: 0 0 4px; font-size: 18px; }
+.settings-head p { margin: 0; }
+.head-right input { width: 90px; margin-left: 6px; padding: 5px 7px; background: var(--card2); color: var(--text); border: 1px solid var(--line); border-radius: 7px; }
+.sites { display: flex; flex-direction: column; gap: 12px; margin: 16px 0 90px; }
+.site {
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px;
+}
+.site .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.site .grid .full { grid-column: 1 / -1; }
+.field label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+.field input, .field select {
+  width: 100%; padding: 7px 9px; color: var(--text); background: var(--card2);
+  border: 1px solid var(--line); border-radius: 8px;
+}
+.site-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.site-head .title { font-weight: 600; }
+.del { background: transparent; color: var(--red); border: 1px solid transparent; cursor: pointer; border-radius: 7px; padding: 3px 8px; }
+.del:hover { border-color: var(--red); }
+.settings-actions {
+  position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 10px; align-items: center;
+  padding: 12px 20px; background: rgba(11, 18, 32, .96); border-top: 1px solid var(--line);
+}
+.settings-actions .btn { flex: 0 0 auto; padding: 9px 18px; }
+.spacer { flex: 1; }
+.hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* 协议识别徽章 */
+.site-head { gap: 10px; }
+.site-head .title { flex: 1; }
+.fw-badge {
+  flex: 0 0 auto; font-size: 11px; padding: 3px 9px; border-radius: 999px;
+  background: var(--card2); border: 1px solid var(--line); color: var(--muted); white-space: nowrap;
+}
+.fw-badge.newapi { background: rgba(251, 191, 36, .14); border-color: rgba(251, 191, 36, .45); color: #fbbf24; }
+.fw-badge.pending { color: var(--muted); font-style: italic; }
+.fw-badge.unknown { color: #f87171; border-color: rgba(248, 113, 113, .4); }
+
+/* 为什么这套协议要/不要登录 */
+.why {
+  background: var(--card2); border: 1px solid var(--line); border-left: 3px solid var(--line);
+  border-radius: 8px; padding: 9px 12px; font-size: 12px; line-height: 1.55; color: var(--text);
+}
+.why:empty { display: none; }
+.why b { font-weight: 600; }
+.why p { margin: 5px 0 0; }
+.why ul { margin: 5px 0 0; padding-left: 18px; }
+.why li { margin: 3px 0; }
+.why code {
+  background: rgba(148, 163, 184, .16); padding: 1px 5px; border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px;
+}
+[data-fw="newapi"] .why { border-left-color: #fbbf24; }
+details.adv { margin-top: 4px; }
+details.adv > summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+details.adv > summary:hover { color: var(--text); }
+
+.pet-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin: 16px 0 4px; }
+.pet-asset-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.pet-asset-row .btn { flex: 0 0 auto; padding: 7px 12px; }
+.pet-asset-row .muted { flex: 1; min-width: 160px; }
+.pet-checks { display: flex; gap: 16px; flex-wrap: wrap; }
+.chk { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text); }
+.switch { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
