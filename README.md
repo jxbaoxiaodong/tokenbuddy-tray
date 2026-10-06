@@ -70,6 +70,7 @@
    | **Linux** | [deb](../../releases/download/v0.4.2/tokenbuddy-tray_0.4.2_amd64.deb) | Debian / Ubuntu |
    | **macOS Intel** | [dmg](../../releases/download/v0.4.2/TokenBuddy-0.4.2.dmg) | Intel 芯片 |
    | **macOS Apple 芯片** | [dmg](../../releases/download/v0.4.2/TokenBuddy-0.4.2-arm64.dmg) | Apple 芯片 |
+
 2. 启动程序。它会缩到系统托盘,托盘图标就是主要入口。
 3. 右键托盘图标 → **设置…** → **添加站点**。
 4. 填写站点名称、**API Key 的 BASE URL**和 **API Key**。BASE URL 应来自你创建 API Key 的服务后台,不是营销官网或登录页。
@@ -78,6 +79,10 @@
 > BASE URL 可以是站点根域名、API 子域名或带 `/v1` 的 API 地址。程序会处理同站跳转,并避免重复拼接 `/v1`。
 > 界面会按 API Key 的 BASE URL 自动识别协议:**Sub2API** 填 API Key 即可;需要登录的协议再填**用户名 + 密码**才能读到账户真实余额。
 > Sub2API 若关闭了 `/v1/usage`,可在「高级」里改用**邮箱 + 密码**登录读取。
+
+### 运行验证
+
+`v0.4.2` Windows 免安装版已在 Windows 11 环境启动并完成界面目视验证。
 
 ## 详细操作
 
