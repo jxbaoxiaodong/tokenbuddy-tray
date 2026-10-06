@@ -356,7 +356,6 @@ function buildMenu() {
     { label: (config.balanceBar && config.balanceBar.enabled ? '隐藏顶栏余额条' : '显示顶栏余额条'), click: () => toggleBalanceBar() },
     { label: (config.pet && config.pet.enabled ? '隐藏桌面宠物' : '显示桌面宠物'), click: () => togglePet() },
     { label: '开机启动', type: 'checkbox', checked: getAutostart(), click: (i) => { setAutostart(i.checked); refreshTray(); } },
-    { label: '桌面宠物设置…', click: () => openSettings('pet') },
     { label: '设置…', click: () => openSettings() },
     { type: 'separator' },
     { label: '退出', click: () => { app.isQuitting = true; app.quit(); } },
