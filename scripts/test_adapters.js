@@ -108,6 +108,20 @@ const SESSION_SITE = 'https://session.test';
     assert.ok(!calls.some((c) => c.includes('/api/user/login')), '不该调用登录接口');
   });
 
+  await t('GET /api/status 只有通用 data 时不误判为 New API', async () => {
+    const calls = mockFetch({
+      'GET /api/status': { body: { data: { version: '1.0.0' } } },
+      'GET /configs': { status: 404, body: {} },
+      'GET /v1/usage': { status: 404, body: {} },
+      'POST /api/v1/auth/login': { status: 404, body: {} },
+    });
+    const d = await A.detectFramework('https://generic-status.test');
+    assert.strictEqual(d.framework, null);
+    assert.deepStrictEqual(Array.from(calls), [
+      'GET /api/status', 'GET /configs', 'GET /v1/usage', 'POST /api/v1/auth/login',
+    ]);
+  });
+
   await t('/v1/usage 未带 Key 返 401 API_KEY_REQUIRED -> 判为 Sub2API', async () => {
     mockFetch({
       'GET /api/status': { status: 404, body: {} },
@@ -647,9 +661,24 @@ const SESSION_SITE = 'https://session.test';
       'GET /v1/dashboard/billing/subscription': { body: { hard_limit_usd: 100 } },
       'GET /v1/dashboard/billing/usage': { status: 404, body: {} },
     });
+    await assert.rejects(
+      () => A.fetchBalance({ baseUrl: PROBE_SITE, apiKey: 'sk-p' }),
+      (e) => /能力探测未能/.test(e.message) && /已拿到总额度但无法取得已用额度/.test(e.message),
+    );
+  });
+
+  await t('billing 候选无法算出余额时继续尝试后面的接口', async () => {
+    const calls = mockFetch({
+      ...NO_ARCH,
+      'GET /v1/usage': { status: 404, body: {} },
+      'GET /v1/dashboard/billing/subscription': { body: { hard_limit_usd: 100 } },
+      'GET /v1/dashboard/billing/usage': { status: 404, body: {} },
+      'GET /api/v1/auth/me': { body: { code: 0, data: { balance: 8 } } },
+    });
     const r = await A.fetchBalance({ baseUrl: PROBE_SITE, apiKey: 'sk-p' });
-    assert.strictEqual(r.balance, null, '拿不到已用就不许把 100 当余额');
-    assert.ok(r.probeNote && /不做减法/.test(r.probeNote));
+    assert.strictEqual(r.probeProtocol, 'authme');
+    assert.strictEqual(r.balance, 8);
+    assert.ok(calls.indexOf('GET /api/v1/auth/me') > calls.indexOf('GET /v1/dashboard/billing/usage'));
   });
 
   await t('能力探测需要 API Key,没有就明说', async () => {
@@ -681,10 +710,20 @@ const SESSION_SITE = 'https://session.test';
     );
   });
 
-  await t('手填接口字段留空 -> 只认顶层 balance/remaining/quota,不递归翻找', async () => {
+  await t('手填接口字段留空 -> 只认顶层 balance/remaining,不猜 quota', async () => {
     mockFetch({ 'GET /api/my/balance': { body: { nested: { balance: 5 }, quota: 66 } } });
-    const r = await A.fetchBalance({ baseUrl: CUSTOM_SITE, apiKey: 'sk-c', balancePath: '/api/my/balance' });
-    assert.strictEqual(r.balance, 66, '只认顶层的 quota,不能去拿 nested.balance');
+    await assert.rejects(
+      () => A.fetchBalance({ baseUrl: CUSTOM_SITE, apiKey: 'sk-c', balancePath: '/api/my/balance' }),
+      /请填写余额字段路径/,
+    );
+  });
+
+  await t('手填接口显式指定 quota 字段仍可使用', async () => {
+    mockFetch({ 'GET /api/my/balance': { body: { quota: 66 } } });
+    const r = await A.fetchBalance({
+      baseUrl: CUSTOM_SITE, apiKey: 'sk-c', balancePath: '/api/my/balance', balanceField: 'quota',
+    });
+    assert.strictEqual(r.balance, 66);
     assert.strictEqual(r.customField, 'quota');
   });
 

@@ -610,6 +610,10 @@ ipcMain.handle('tb:saveConfig', async (_e, cfg) => {
     return {
       id, name: s.name || '站点', type: s.type || '', baseUrl: s.baseUrl || '',
       email: s.email || '', username: s.username || '', userId: s.userId || '', quotaPerUnit: s.quotaPerUnit || undefined,
+      // 自定义余额接口和能力探测状态属于站点路由配置,必须和凭据一起持久化。
+      balancePath: s.balancePath || '', balanceField: s.balanceField || '',
+      balanceAuth: s.balanceAuth || '', balanceUnit: s.balanceUnit || '',
+      probeProtocol: s.probeProtocol || '',
       password: encSecret(s.password),
       // 登录身份未变化时保留完整后台会话；改地址/账号/密码则全部失效。
       accessToken: sameLogin ? previous.accessToken : '',

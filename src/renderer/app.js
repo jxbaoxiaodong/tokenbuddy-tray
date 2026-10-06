@@ -158,7 +158,7 @@ function siteCard(site) {
         <div class="grid" style="margin-top:12px">
           <div class="field full"><label>余额接口路径(填了就以它为准:不识别协议、不做探测。可用 {{key}} 代表 API Key)</label>
             <input data-k="balancePath" placeholder="/api/custom/balance?key={{key}}" value="${esc(site.balancePath)}"/></div>
-          <div class="field"><label>余额字段(留空=只找顶层 balance / remaining / quota)</label>
+          <div class="field"><label>余额字段(留空=只找顶层 balance / remaining)</label>
             <input data-k="balanceField" placeholder="data.balance" value="${esc(site.balanceField)}"/></div>
           <div class="field"><label>余额接口认证</label>
             <select data-k="balanceAuth">
@@ -254,7 +254,8 @@ async function saveSettings() {
     // 只有 Sub2API 才用邮箱登录;旧配置把邮箱填在 username 里,这里搬回 email。
     // New API 的 username 是登录账号,不能当成邮箱,否则两边字段都被污染。
     if (o.type !== 'newapi' && o.username && !o.email) o.email = o.username;
-    if (o.baseUrl && (o.apiKey || o.password)) sites.push(o);
+    // 公开自定义余额接口可以不需要 API Key/密码,只要填了余额路径也应保存。
+    if (o.baseUrl && (o.apiKey || o.password || o.balancePath)) sites.push(o);
   });
   cfg.sites = sites;
   cfg.refreshSeconds = Number($('s-interval').value) || 120;

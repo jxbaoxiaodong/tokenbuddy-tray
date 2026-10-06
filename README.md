@@ -60,16 +60,16 @@
 
 ## 快速开始
 
-1. 从 [`v0.4.2 Release`](../../releases/tag/v0.4.2) 下载与你的系统和 CPU 架构匹配的安装包:
+1. 从 [`v0.4.3 Release`](../../releases/tag/v0.4.3) 下载与你的系统和 CPU 架构匹配的安装包:
 
    | 系统 | 下载 | 说明 |
    |---|---|---|
-   | **Windows** | [免安装版](../../releases/download/v0.4.2/TokenBuddy.0.4.2.exe) | 直接运行 |
-   | **Windows** | [安装版](../../releases/download/v0.4.2/TokenBuddy.Setup.0.4.2.exe) | 带安装向导 |
-   | **Linux** | [AppImage](../../releases/download/v0.4.2/TokenBuddy-0.4.2.AppImage) | 下载后赋予执行权限 |
-   | **Linux** | [deb](../../releases/download/v0.4.2/tokenbuddy-tray_0.4.2_amd64.deb) | Debian / Ubuntu |
-   | **macOS Intel** | [dmg](../../releases/download/v0.4.2/TokenBuddy-0.4.2.dmg) | Intel 芯片 |
-   | **macOS Apple 芯片** | [dmg](../../releases/download/v0.4.2/TokenBuddy-0.4.2-arm64.dmg) | Apple 芯片 |
+   | **Windows** | [免安装版](../../releases/download/v0.4.3/TokenBuddy.0.4.3.exe) | 直接运行 |
+   | **Windows** | [安装版](../../releases/download/v0.4.3/TokenBuddy.Setup.0.4.3.exe) | 带安装向导 |
+   | **Linux** | [AppImage](../../releases/download/v0.4.3/TokenBuddy-0.4.3.AppImage) | 下载后赋予执行权限 |
+   | **Linux** | [deb](../../releases/download/v0.4.3/tokenbuddy-tray_0.4.3_amd64.deb) | Debian / Ubuntu |
+   | **macOS Intel** | [dmg](../../releases/download/v0.4.3/TokenBuddy-0.4.3.dmg) | Intel 芯片 |
+   | **macOS Apple 芯片** | [dmg](../../releases/download/v0.4.3/TokenBuddy-0.4.3-arm64.dmg) | Apple 芯片 |
 
 2. 启动程序。它会缩到系统托盘,托盘图标就是主要入口。
 3. 右键托盘图标 → **设置…** → **添加站点**。
@@ -82,7 +82,7 @@
 
 ### 运行验证
 
-`v0.4.2` Windows 免安装版已在 Windows 11 环境启动并完成界面目视验证。
+`v0.4.3` 的 Windows、Linux、macOS 安装包由 GitHub Actions 在对应系统构建并上传到 Release。
 
 ## 详细操作
 

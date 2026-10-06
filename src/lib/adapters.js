@@ -303,9 +303,16 @@ async function detectFramework(baseUrl) {
   // New API:/api/status 是公开端点
   try {
     const s = await http(routeUrl(base, '/api/status'));
-    if (s.status === 200 && s.json && s.json.data) {
+    const d = s.json && s.json.data;
+    // 仅有任意 data 的通用接口不能证明是 New API;至少要出现 New API
+    // 额度元数据中的一个字段,否则应继续走后续识别/能力探测。
+    const looksLikeNewapi = d && typeof d === 'object' && (
+      Number(d.quota_per_unit) > 0 ||
+      typeof d.quota_display_type === 'string' ||
+      Number(d.usd_exchange_rate) > 0
+    );
+    if (s.status === 200 && looksLikeNewapi) {
       out.framework = 'newapi';
-      const d = s.json.data;
       if (Number(d.quota_per_unit) > 0) out.quotaPerUnit = Number(d.quota_per_unit);
       if (d.quota_display_type) out.displayType = String(d.quota_display_type);
       if (Number(d.usd_exchange_rate) > 0) out.usdExchangeRate = Number(d.usd_exchange_rate);
@@ -441,6 +448,9 @@ async function newapiByKey(base, key, site, det) {
   const unlimited = granted === NEWAPI_UNLIMITED_SENTINEL;
   // 已用拿不到时不做减法,避免把总额度误当余额显示
   const balance = (unlimited || used == null) ? null : granted - used;
+  if (!unlimited && balance < 0) {
+    throw new Error('New API 计费接口的已用额度超过总额度,余额口径不一致');
+  }
   return {
     framework: 'newapi', name: site.name || base,
     balance, unit: meta.unit, limit: granted, totalCost: used,
@@ -751,7 +761,8 @@ async function customBalanceQuery(site) {
       + (snippet ? ',响应前 200 字:' + snippet : ',响应体为空'));
   }
 
-  // 字段路径留空时只认顶层的三个明确名字,不递归翻找
+  // 字段路径留空时只认顶层的两个明确余额字段,不把语义不统一的
+  // quota 猜成余额;需要 quota 的站点应由用户显式填写字段路径。
   const fieldPath = String(site.balanceField || '').trim();
   let raw = null, usedField = null;
   if (fieldPath) {
@@ -761,9 +772,9 @@ async function customBalanceQuery(site) {
       throw new Error('自定义余额字段「' + fieldPath + '」不是数字,实际拿到:' + JSON.stringify(raw));
     }
   } else {
-    const hit = pickNum(r.json, ['balance', 'remaining', 'quota']);
+    const hit = pickNum(r.json, ['balance', 'remaining']);
     if (hit.value == null) {
-      throw new Error('自定义余额接口未在顶层返回 balance/remaining/quota,实际拿到:' + Object.keys(r.json).join(', '));
+      throw new Error('自定义余额接口未在顶层返回 balance/remaining,如接口使用 quota 请填写余额字段路径;实际拿到:' + Object.keys(r.json).join(', '));
     }
     raw = hit.value; usedField = hit.field;
   }
@@ -872,7 +883,6 @@ async function runProbes(base, key, site, list) {
       attempts.push(p.label + ' → 200 但响应里没有可识别的余额字段');
       continue;
     }
-    site.probeProtocol = p.id;
     const out = {
       framework: 'probe', probeProtocol: p.id, probeField: got.field, probeLabel: p.label,
       name: got.name || site.name || base,
@@ -892,13 +902,21 @@ async function runProbes(base, key, site, list) {
         const u = await http(routeUrl(base, '/v1/dashboard/billing/usage?start_date=' + iso(start) + '&end_date=' + iso(end)), { headers: bearer(key) });
         if (u.json && typeof u.json.total_usage === 'number') used = u.json.total_usage / 100;
       } catch (e) {}
-      out.totalCost = used;
-      out.balance = (unlimited || used == null) ? null : got.limit - used;
-      out.unlimitedHint = unlimited ? '该 Key 为无限额度,站点不提供可显示的数字余额' : null;
+      // 无限额度本身就是完整且合法的结果;有限额度必须拿到已用值后
+      // 才能算出余额,否则继续尝试后面的候选接口。
       if (!unlimited && used == null) {
-        out.probeNote = '已拿到总额度 ' + got.limit + ',但已用额度查不到,不做减法(避免把总额度当余额)';
+        attempts.push(p.label + ' → 已拿到总额度但无法取得已用额度');
+        continue;
+      }
+      out.totalCost = used;
+      out.balance = unlimited ? null : got.limit - used;
+      out.unlimitedHint = unlimited ? '该 Key 为无限额度,站点不提供可显示的数字余额' : null;
+      if (!unlimited && out.balance < 0) {
+        attempts.push(p.label + ' → 已用额度超过总额度,余额口径不一致');
+        continue;
       }
     }
+    site.probeProtocol = p.id;
     return out;
   }
   throw new Error('能力探测未能从任何已知接口读到余额。真实结果:\n' + attempts.join('\n'));
