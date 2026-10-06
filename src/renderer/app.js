@@ -106,7 +106,7 @@ function initPopup() {
   $('p-refresh').onclick = () => window.tb.refresh();
   $('p-gear').onclick = () => window.tb.openSettings();
   $('p-settings').onclick = () => window.tb.openSettings();
-  $('p-quit').onclick = (e) => { e.preventDefault(); window.tb.quit(); };
+  $('p-quit').onclick = (e) => { e.preventDefault(); window.tb.hidePopup(); };
   $('p-site').onchange = (e) => window.tb.setActive(e.target.value);
   window.tb.getSnapshot().then((s) => { snap = s; renderPopup(); });
   window.tb.onUpdate((s) => { snap = s; renderPopup(); });
