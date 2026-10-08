@@ -588,7 +588,10 @@ function setAutostart(enabled) {
       fs.mkdirSync(path.dirname(f), { recursive: true });
       const exec = process.env.APPIMAGE || process.execPath;
       const quotedExec = '"' + String(exec).replace(/([\\"`$])/g, '\\$1') + '"';
-      fs.writeFileSync(f, '[Desktop Entry]\nType=Application\nName=TokenBuddy\nComment=TokenBuddy 余额托盘与桌面宠物\nExec=' + quotedExec + '\nX-GNOME-Autostart-enabled=true\n');
+      // AppImage 在部分 Linux 安装环境中无法设置 Chromium sandbox helper 的
+      // setuid 权限; 保证从系统启动项启动时与手动启动行为一致。
+      const sandboxArgs = process.env.TB_ENABLE_SANDBOX === '1' ? '' : ' --no-sandbox';
+      fs.writeFileSync(f, '[Desktop Entry]\nType=Application\nName=TokenBuddy\nComment=TokenBuddy 余额托盘与桌面宠物\nExec=' + quotedExec + sandboxArgs + '\nX-GNOME-Autostart-enabled=true\n');
     } else { try { fs.unlinkSync(f); } catch (e) {} }
   } else {
     try { app.setLoginItemSettings({ openAtLogin: !!enabled, openAsHidden: true }); } catch (e) {}

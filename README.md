@@ -238,7 +238,7 @@ GET /api/user/self                   →  data.quota
 - **余额数字前面没有货币符号**:服务没有在 `/api/status` 里公布币种,程序不猜。到「高级 → 币种」填上就显示符号了。
 - **Linux 桌面不显示托盘图标**:GNOME 需安装 AppIndicator 扩展(如 `gnome-shell-extension-appindicator`);或使用 KDE / XFCE 等原生支持托盘的桌面。
 - **Linux 启动即退出并提示 `GPU process isn't usable`**:用 `--disable-gpu` 启动(受限环境或 Wayland 下常见)。
-- **Linux 提示沙箱错误**:用 `--no-sandbox` 启动(部分受限环境需要)。
+- **Linux 安装后从应用列表点开没有显示、终端提示 Chromium sandbox 错误**:这是 AppImage 在部分系统上无法设置 Chromium sandbox helper 的 setuid 权限。当前版本的 Linux 开机自启会默认带 `--no-sandbox`,手动启动也可执行 `TokenBuddy-*.AppImage --no-sandbox`;如果系统已正确配置 helper 且希望恢复沙箱,设置环境变量 `TB_ENABLE_SANDBOX=1` 后重新在应用设置中开启开机自启即可。
 
 ## 开发
 
