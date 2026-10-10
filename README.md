@@ -238,7 +238,7 @@ GET /api/user/self                   →  data.quota
 - **余额数字前面没有货币符号**:服务没有在 `/api/status` 里公布币种,程序不猜。到「高级 → 币种」填上就显示符号了。
 - **Linux 桌面不显示托盘图标**:GNOME 需安装 AppIndicator 扩展(如 `gnome-shell-extension-appindicator`);或使用 KDE / XFCE 等原生支持托盘的桌面。
 - **Linux 启动即退出并提示 `GPU process isn't usable`**:用 `--disable-gpu` 启动(受限环境或 Wayland 下常见)。
-- **Linux 安装后从应用列表点开没有显示、终端提示 Chromium sandbox 错误**:这是 AppImage 在部分系统上无法设置 Chromium sandbox helper 的 setuid 权限。当前版本的 Linux 开机自启会默认带 `--no-sandbox`,手动启动也可执行 `TokenBuddy-*.AppImage --no-sandbox`;如果系统已正确配置 helper 且希望恢复沙箱,设置环境变量 `TB_ENABLE_SANDBOX=1` 后重新在应用设置中开启开机自启即可。
+- **Linux 从应用列表(应用网格)点图标没反应、终端提示 Chromium sandbox 错误**:AppImage 无法给 `chrome-sandbox` 设 setuid(Ubuntu 24.04 又默认限制非特权 user namespace),Chromium 只能回退到 SUID 沙箱,而 helper 没 setuid 时它会以 `FATAL:setuid_sandbox_host.cc` 立即退出。更麻烦的是部分桌面(GNOME)从应用网格启动时不会把 `.desktop` 的 `Exec` 参数传进来,所以"手动加 `--no-sandbox`"也救不了它。现在打包时会往 AppImage 内部的 `AppRun` 固定追加 `--no-sandbox --disable-gpu`,无论谁启动、有没有传参都能起来(见「打包」)。开机自启同样默认带这两个参数;若系统已正确配置 sandbox helper 且希望恢复沙箱,设 `TB_ENABLE_SANDBOX=1` 后重新开启开机自启。
 
 ## 开发
 
@@ -258,6 +258,8 @@ npm run dist:mac     # dmg + zip(必须在 macOS 上执行)
 
 推 tag 会触发 GitHub Actions 自动为 **Windows / Linux / macOS** 出包并生成 Release 附件。
 
+打包完成后 `afterAllArtifactBuild` 会自动做两件收尾:`scripts/patch-deb-postinst.js` 给 deb 的 `postinst` 补回 SUID 沙箱修复;`scripts/patch-appimage-apprun.js` 解包 AppImage、改写内部 `AppRun` 固定追加 `--no-sandbox --disable-gpu` 后再重新打包(解决 Linux 从应用网格点图标起不来,详见「常见问题」)。因此 Linux 出包流程(含 CI)需要系统里有 `mksquashfs`(`squashfs-tools`)。
+
 ## 目录结构
 
 ```
@@ -276,6 +278,8 @@ scripts/
   pet-state-test.js  宠物状态切换测试(npm run test:pet)
   build-pet-assets.py 从素材源图重新生成 assets/pet/
   patch-deb-postinst.js 打包后向 deb 的 postinst 追加 SUID 沙箱修复
+  patch-appimage-apprun.js 打包后改写 AppImage 内部 AppRun,固定追加 --no-sandbox --disable-gpu
+  after-all-artifact-build.js 依次调用上面两个收尾脚本(afterAllArtifactBuild 入口)
 ```
 
 ## License

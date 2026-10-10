@@ -591,7 +591,10 @@ function setAutostart(enabled) {
       // AppImage 在部分 Linux 安装环境中无法设置 Chromium sandbox helper 的
       // setuid 权限; 保证从系统启动项启动时与手动启动行为一致。
       const sandboxArgs = process.env.TB_ENABLE_SANDBOX === '1' ? '' : ' --no-sandbox';
-      fs.writeFileSync(f, '[Desktop Entry]\nType=Application\nName=TokenBuddy\nComment=TokenBuddy 余额托盘与桌面宠物\nExec=' + quotedExec + sandboxArgs + '\nX-GNOME-Autostart-enabled=true\n');
+      // Wayland/受限环境下 GPU 进程可能启动失败(FATAL: GPU process isn't usable),
+      // 桌面宠物与余额条本就禁用硬件加速,这里一并关掉 GPU 进程保证能起来。
+      const gpuArgs = ' --disable-gpu';
+      fs.writeFileSync(f, '[Desktop Entry]\nType=Application\nName=TokenBuddy\nComment=TokenBuddy 余额托盘与桌面宠物\nExec=' + quotedExec + sandboxArgs + gpuArgs + '\nX-GNOME-Autostart-enabled=true\n');
     } else { try { fs.unlinkSync(f); } catch (e) {} }
   } else {
     try { app.setLoginItemSettings({ openAtLogin: !!enabled, openAsHidden: true }); } catch (e) {}
